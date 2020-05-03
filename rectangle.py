@@ -18,7 +18,7 @@ def mask(img, color_ranges):
 def thresh(img):
     _, th = cv2.threshold(img, 127, 255, 0)
     return th
-    
+
 def get_contours(img):
     contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     return contours

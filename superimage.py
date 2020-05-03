@@ -43,26 +43,63 @@ class SuperImage:
 
     def rotate(self):
         center, box, angle = self.get_rectangle()
-        center = round(center[0]), round(center[1])
-        rev_center = center[1], center[0]
+        center = [round(val) for val in center]
 
-        cv2.circle(self.image, center, 8, (0, 255, 0), -1)
         angle = 90 + angle if angle < -45 else -angle
         size = self.image.shape
         size = ( round(size[1]), round(size[0]) )
 
-        M = cv2.getRotationMatrix2D(rev_center, angle, 1)
-        return cv2.warpAffine(self.image, M, size)
+        cv2.circle(img.image, tuple(center), 8, (0, 0, 255), -1) # TODO
+        M = cv2.getRotationMatrix2D(tuple(center), angle, 1)
+        dst = cv2.warpAffine(self.image, M, size)
+
+        cv2.circle(dst, tuple(center), 5, (0, 255, 0), -1) # TODO
+        return dst
+
+    def pers_transf(self):
+        rect = self.get_rectangle()
+        old_box = cv2.boxPoints(rect)
+        old_box = [[round(val[0]), round(val[1])] for val in old_box]
+        old_box = np.float32(old_box)
+
+        center, new_box, angle = rect
+        new_box = [round(val) for val in reversed(new_box)]
+        size = tuple(new_box)
+        new_box = [[0, 0], [new_box[0], 0], [0, new_box[1]], new_box ]
+        new_box = sorted(new_box, key=lambda x: (-x[1], -x[0]))
+        last_elem = new_box.pop(-2)
+        new_box = new_box + [last_elem]
+        new_box = np.float32(new_box)
+
+        M = cv2.getPerspectiveTransform(old_box, new_box)
+
+        dst = cv2.warpPerspective(self.image, M, size)
+        return dst
+
 
 
 img = SuperImage('img.png', 'red')
-print(img.get_rectangle())
-rot = img.rotate()
 
-#cv2.imshow('Blur', rot)
-cv2.imshow('Blur', img.image)
-cv2.imshow('Rot', img.rotate())
+pers = img.pers_transf()
+gray = cv2.cvtColor(pers, cv2.COLOR_BGR2GRAY)
+gray = cv2.GaussianBlur(gray, (3, 3), 0)
+
+_, th = cv2.threshold(gray, 194, 255, cv2.THRESH_BINARY)
+
+#_, th = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+th = cv2.dilate(th, None, iterations=1)
+th = cv2.erode(th, None, iterations=1)
+
+_, th = cv2.threshold(th, 1, 255, cv2.THRESH_BINARY_INV)
+
+
+
+cv2.imshow('Pers', th)
+cv2.imshow('Gray', gray)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
+import pytesseract
+print(pytesseract.image_to_string(th))
