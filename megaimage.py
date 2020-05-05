@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import pytesseract
 
-class SuperImage:
+class DocumentOcr(object):
     color_ranges = {
         'red': ([[0, 80, 80], [10, 255, 255]],
                 [[170, 80, 80], [180, 255, 255]]
@@ -22,7 +22,8 @@ class SuperImage:
         return img
 
     def get_mask(self):
-        blur = cv2.medianBlur(self.sharp_image, 5)
+        blur = cv2.medianBlur(self.image, 5)
+#        blur = cv2.medianBlur(self.sharp_image, 5)
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
         mask = 0
@@ -73,9 +74,11 @@ class SuperImage:
         _, th = cv2.threshold(th, 1, 255, cv2.THRESH_BINARY_INV)
         return th
 
+    def extract_code(self, image):
+        pass
 
 
-img = SuperImage('img.png', 'red')
+img = DocumentOcr('img.png', 'red')
 refined = img.refining()
 
 cv2.imshow('IMG', img.image)
