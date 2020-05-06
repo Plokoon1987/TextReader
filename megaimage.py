@@ -22,8 +22,7 @@ class DocumentOcr(object):
         return img
 
     def get_mask(self):
-        blur = cv2.medianBlur(self.image, 5)
-#        blur = cv2.medianBlur(self.sharp_image, 5)
+        blur = cv2.medianBlur(self.unsharp_mask(1), 5)
         hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
         mask = 0
@@ -66,19 +65,16 @@ class DocumentOcr(object):
         gray = cv2.cvtColor(pers, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (3, 3), 0)
 
-        _, th = cv2.threshold(gray, 194, 255, cv2.THRESH_BINARY)
+        _, th = cv2.threshold(gray, 198, 255, cv2.THRESH_BINARY)
 
-        th = cv2.dilate(th, None, iterations=1)
-        th = cv2.erode(th, None, iterations=1)
+#        th = cv2.dilate(th, None, iterations=1)
+#        th = cv2.erode(th, None, iterations=1)
 
         _, th = cv2.threshold(th, 1, 255, cv2.THRESH_BINARY_INV)
         return th
 
-    def extract_code(self, image):
-        pass
 
-
-img = DocumentOcr('img.png', 'red')
+img = DocumentOcr('sample0.png', 'red')
 refined = img.refining()
 
 cv2.imshow('IMG', img.image)
