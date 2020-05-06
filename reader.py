@@ -151,22 +151,3 @@ class DocumentOcr(object):
         _, th = cv2.threshold(th, 1, 255, cv2.THRESH_BINARY_INV)
 
         return pytesseract.image_to_string(th)
-
-images = [['sample0.png', 'U62QMKI'],
-          ['sample1.png', 'SGSO9MU'],
-          ['sample2.png', '8HBBNEY6'],
-          ['sample3.png', 'MOROYKHN'],
-          ]
-
-for image in images:
-    img = cv2.imread(image[0])
-    print(DocumentOcr().red_box(img))
-#    a = DocumentOcr().extract_code(img)
-#    cv2.imshow(image[0], a)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-
-img = cv2.imread('sample0.png')
-print(DocumentOcr().red_box(img))
